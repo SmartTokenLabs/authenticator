@@ -17,7 +17,10 @@ Dauth (Delegated-key Authentication, or decentralised authentication) provides W
 ![Communication Flow Chart](compared_with_oauth.svg "Compare DAuth with OAuth")
 
 When a user logs in on a website:
-The user's wallet derives a delegated signing key pair at the login by deriving it from their Ethereum address, using the website's domain name along with some high entropy randomness as the derivation factors.
+The user's wallet derives a delegated signing key pair at the login by deriving it from the user's Ethereum address, using the website's domain name along with some high entropy randomness as the derivation factors[^1].
+
+[^1]: The Ethereum address might already be the result of a BIP-32 derivation from a master key, but derived further. The derivation factor to be used is a topic of its own, which will be covered later.
+
 The website generates a challenge which the user answers by signing. At this point, the website acknowledges a user identified by the delegated public key, and it doesn't know the user's Ethereum address. Therefore it doesn't know the user's net-worth represented by the Ethereum balance (Privacy concern).
 At a later point of time during the session, the user can choose to submit his or her Ethereum address along with the necessary derivation factors, thus proving that they are the address owner. The website can verify the relationship between the delegated signing key and the user's Ethereum address.
 
