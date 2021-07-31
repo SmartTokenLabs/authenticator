@@ -4,9 +4,9 @@
 
 Dauth (Delegated-key Authentication, or decentralised authentication) provides Web2 developers with a login and authentication method that is based on Ethereum and is password-less. It will use the same Oauth API formats and similar communication flow that Web2 developers are already familiar with. This method is superior to logging in through signing a message with an Ethereum key because of the following reasons.
 
-**1. Privacy**: Users can *either* a) login **anonymously** *or* b) bind the login session with an Ethereum Address / ENS name. If the user logins in anonymously, the website does not learn the user's Ethereum address. And during the session, if the user chooses to identify themselves with Eth Address or ENS name, they can do so without changing the session or authentication token.
+**1. Privacy**: Users can *either* a) login **anonymously** *or* b) bind the login session with an Ethereum Address / ENS name. If the user logs in anonymously, the website does not learn the user's Ethereum address. And during the session, if the user chooses to identify themselves with Eth Address or ENS name, they can do so without changing the session or authentication token.
 
-**2. Security**: The user's Ethereum key is not directly used. Instead, a delegated key is generated for each website and not shared between websites. This prevents man-in-the-middle attack, where a website forwards the login challenge from one site to another. By using one key per site, if deligated auth keys are compromised, its originating Ethereum key is not and safety of crypto assets are not affected.
+**2. Security**: The user's Ethereum key is not directly used. Instead, a delegated key is generated for each website and not shared between websites. This prevents man-in-the-middle attack, where the attacking website forwards the login challenge from another site to itself. Furthermore, by using one key per site, if delegated auth keys are compromised, its originating Ethereum key is not and safety of crypto assets are not affected.
 
 **3. User Experience**: The user, having logged in, can decide how long the session remains active (e.g. at home, longer sessions are allowed). The user doesn't need to do anything on the UI level, even if the website session times out and requires re-authentication; the authentication happens silently. This prevents modern-day awkwardness such as "session expired, please log in again".
 
@@ -16,7 +16,7 @@ Dauth (Delegated-key Authentication, or decentralised authentication) provides W
 
 ![Communication Flow Chart](compared_with_oauth.svg "Compare DAuth with OAuth")
 
-When a user logs in on a website:
+When a user logs in a website:
 The user's wallet derives a delegated signing key pair at the login by deriving it from the user's Ethereum address, using the website's domain name along with some high entropy randomness as the derivation factors[^1].
 
 [^1]: The Ethereum address might already be the result of a BIP-32 derivation from a master key, but derived further. The derivation factor to be used is a topic of its own, which will be covered later.
@@ -34,9 +34,9 @@ Since the auth key stays with the browser, the browser can determine how safe th
 
 ## Specification
 
-Assume the user's real Ethereum key is denoted by as `sk` and hence that its corresponding public key is `pk=G*sk`. That is, `G` is the generator for secp256k1 ECDSA. We assume the address of this public key is computed through a function `addr`, i.e. the user's address is `addr(pk)`.
+Assume the user's Ethereum key of their address is denoted by as `sk` and hence that its corresponding public key is `pk=G*sk`. That is, `G` is the generator for secp256k1 ECDSA. We assume the address of this public key is computed through a function `addr`, i.e. the user's address is `addr(pk)`.
 
-The first time the user wants to log on to a third party site with the domain `domain`, the user samples a random private ECDSA key, denoted by `r`, and an unpredictable number denoted by `un`. The user then computes a derived, private ECDSA key `sk_r=r+Keccak(addr(pk),domain,un)` and a corresponding public key `pk_r=G*(r+Keccak(addr(pk),domain,un))`. The user uses the public key to identify themself towards the third party site by signing authentication request challenge using `sk_r`. But the user furthermore computes the value `R=G*r` and ensures to include a signature on this when it starts talking with the third party site for the first time.
+The first time the user wants to log in to a website with the domain `domain`, the user samples a random private ECDSA key, denoted by `r`, and an unpredictable number denoted by `un`. The user then computes a derived, private ECDSA key `sk_r=r+Keccak(addr(pk),domain,un)` and a corresponding public key `pk_r=G*(r+Keccak(addr(pk),domain,un))`. The user uses the public key to identify themself towards the third party site by signing authentication request challenge using `sk_r`. But the user furthermore computes the value `R=G*r` and ensures to include a signature on this when it starts talking with the third party site for the first time.
 That is, the user computes the signature `a=sign(sk_r, (R,pk_r, d))` where `d` is the challenge supplied by the website and returns `a`,`R` and `pk_r` to the website. Then website verifies the signature with `pk_r` on the tuple `(R,pk_r,d)`.
 
 If the user later wants to share their Ethereum identity with the third party site, they ask the site for a new unique challenge `c`. The user then computes a personal signature on this challenge and the value `R=G*r` using its private Ethereum key, that is `b=sign_sk(c, R)`. The user then shares `R`,`un`, `b` and `addr(pk)` with the third party site. The site then derives the user's candidate public key from `b` and checks that `pk_r=R+G*Keccak(addr(pk),domain,un)`. If so, it accepts the key the user has used with the site, `pk_r`, with the user's true Ethereum address `addr(pk)`.
