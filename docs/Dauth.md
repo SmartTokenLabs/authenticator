@@ -36,17 +36,17 @@ Since the auth key stays with the browser, the browser can determine how safe th
 
 Assume the user's Ethereum key of their address is denoted by as `sk` and hence that its corresponding public key is `pk=G*sk`. That is, `G` is the generator for secp256k1 ECDSA. We assume the address of this public key is computed through a function `addr`, i.e. the user's address is `addr(pk)`.
 
-The first time the user wants to log in to a website with the domain `domain`, the user samples a random private ECDSA key, denoted by `r`, and an unpredictable number denoted by `un`. The user then computes a derived, private ECDSA key `sk_r=r+Keccak(addr(pk),domain,un)` and a corresponding public key `pk_r=G*(r+Keccak(addr(pk),domain,un))`. The user uses the public key to identify themself towards the third party site by signing authentication request challenge using `sk_r`. But the user furthermore computes the value `R=G*r` and ensures to include a signature on this when it starts talking with the third party site for the first time.
+The first time the user wants to log in to a website with the domain `domain`, the user samples a random private ECDSA key, denoted by `r`, and an unpredictable number denoted by `un`. The user then computes a derived, private ECDSA key `sk_r=r+Keccak(addr(pk),domain,un)` and a corresponding public key `pk_r=G*(r+Keccak(addr(pk),domain,un))`. The user uses the public key to identify themself towards the website by signing authentication request challenge using `sk_r`. But the user furthermore computes the value `R=G*r` and ensures to include a signature on this when it starts talking with the website for the first time.
 That is, the user computes the signature `a=sign(sk_r, (R,pk_r, d))` where `d` is the challenge supplied by the website and returns `a`,`R` and `pk_r` to the website. Then website verifies the signature with `pk_r` on the tuple `(R,pk_r,d)`.
 
-If the user later wants to share their Ethereum identity with the third party site, they ask the site for a new unique challenge `c`. The user then computes a personal signature on this challenge and the value `R=G*r` using its private Ethereum key, that is `b=sign_sk(c, R)`. The user then shares `R`,`un`, `b` and `addr(pk)` with the third party site. The site then derives the user's candidate public key from `b` and checks that `pk_r=R+G*Keccak(addr(pk),domain,un)`. If so, it accepts the key the user has used with the site, `pk_r`, with the user's true Ethereum address `addr(pk)`.
+If the user later wants to share their Ethereum identity with the website, they ask the site for a new unique challenge `c`. The user then computes a personal signature on this challenge and the value `R=G*r` using its private Ethereum key, that is `b=sign(sk, (c, R))`. The user then shares `R`,`un`, `b` and `addr(pk)` with the website. The site then derives the user's candidate public key from `b` and checks that `pk_r=R+G*Keccak(addr(pk),domain,un)`. If so, it accepts the key the user has used with the site, `pk_r`, with the user's true Ethereum address `addr(pk)`.
 
-The crux is
+The crux is the following:
 
-1. the user both proves ownership of their Ethereum key by signing the challenge `c` provided by the third party site;
+1. The user both proves ownership of their Ethereum key by signing the challenge `c` provided by the website.
 
-2. the thrid party site cannot brute-force the user's address due to the unpredictability in `un` and;
+2. The thrid party site cannot brute-force the user's address due to the unpredictability in `un.
 
-3. the signing key the user has used with the third party site has been linked to their Ethereum address from the get-go. The latter is achieved since the user commits to the random parts of its site-specific key, through the value `R`.
+3. The signing key the user has used with the website has been linked to their Ethereum address from the get-go. The latter is achieved since the user commits to the random parts of its site-specific key, through the value `R`.
 
 ## Further work
