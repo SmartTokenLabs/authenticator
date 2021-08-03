@@ -4,11 +4,11 @@
 
 Dauth (decentralised authentication) provides Web2 developers with a login and authentication method based on Oauth and the password-less Ethereum cryptography. It will use the same Oauth API formats and similar communication flow that Web2 developers are already familiar with, as well as its key management principles. This method is superior to logging in through signing a message with an Ethereum key because of the following reasons.
 
-**1. Privacy**: Users can *either* a) login **anonymously** *or* b) bind the login session with an Ethereum Address / ENS name. If the user logs in anonymously, the website does not learn the user's Ethereum address. And during the session, if the user chooses to identify themselves with Eth Address or ENS name, they can do so without changing the session or authentication token.
+**1. Privacy**: Users can *either* a) login **anonymously** *or* b) bind the login session with an Ethereum Address / ENS name. If the user logs in anonymously, the website does not learn the user's Ether balance or token holding. And during the session, if the user chooses to identify themselves with his Ethereum address and/or ENS name, they can do so by providing a proof, without changing the session or authentication key.
 
-**2. Security**: The user's Ethereum key is not directly used. Instead, a delegated key is generated for each session and not shared between websites. This 1) prevents man-in-the-middle attack, where the attacking website forwards the login challenge from another site to itself; 2) allows the delegated key to be revoked, so the user can stop stolen devices to stay in the login session; 3)  by using one key per site, if delegated auth keys are compromised, its originating Ethereum key is not and safety of crypto assets are not affected.
+**2. Security**: The user's Ethereum key is not directly used. Instead, a *refresh key pair* is generated for each session and not shared between websites. This 1) prevents man-in-the-middle attack, where the attacking website forwards the login challenge from another site to itself; 2) allows the key pair to be revoked, so the user can stop stolen devices to stay in the login session; 3)  by using one key pair per site, if the keys are compromised, its originating Ethereum key is not, therefore, the safety of crypto assets is not affected.
 
-**3. User Experience**: The user, having logged in, can decide how long the session remains active (e.g. at home, longer sessions are allowed). The user doesn't need to do anything on the UI level, even if the website session times out and requires re-authentication; the authentication happens silently. This prevents modern-day awkwardness such as "session expired, please log in again". (The website might disable such behavior from their side.)
+**3. User Experience**: The user, having logged in, can decide how long the session remains active (e.g. at home, longer sessions are allowed). The user doesn't need to do anything on the UI level, even if the website session times out and requires re-authentication; the authentication happens silently. This prevents modern-day awkwardness such as "session expired, please log in again".
 
 **4. Decentralisation**: No other servers are involved when a webserver allows users to log in using ETH Address. However if ENS is used, a node is involved.
 
@@ -63,7 +63,7 @@ This provides adaptive identification. For example, a user who visits an e-comme
 - The communication protocol, largely based on Oauth, needs to be defined and tested with web2 developers to determine if it is easy to adopt.
 - A wallet extension needs to be defined and implemented in one of the opensource Ethereum wallets. This extension is not required for Dauth to work, but it improves security and user experience.
 - A JavaScript package needs to be developed for web2.0 developers to adopt Dauth similarly to Facebook/Google's Oauth 2.0.
-- A backend package that can verify the signature, as well as the refresh key's public key, is correctly derivated. Such a package may need to be in both JavaScript and PHP.
+- A backend package that can verify the signature, as well as the *refresh key*'s public key, is correctly constructed for the current website domain. Such a package may need to be in both JavaScript and PHP.
 
 ## FAQ
 
