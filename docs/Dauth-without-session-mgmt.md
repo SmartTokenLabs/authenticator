@@ -38,41 +38,43 @@ Assume the user's Ethereum key of their address is denoted by as `sk` and hence 
 
 ### User trying to log in for the first time
 
-The first time the user wants to log in to a website with the domain `domain`, derive a delegated Ethereum key using `domain` as the derivation factor based on their private Ethereum key `sk`. This can for example be done using BIP-32. Denote the private part of this delegated key by `r`, denote the public part of they key by `R=G*r`. This public key will uniquely identify the user across sessions and devices.
+The first time the user wants to log in to a website with the domain `domain`, derive a delegated Ethereum key using `domain` as the derivation factor based on their private Ethereum key `sk`. This can for example be done using BIP-32. Denote the private part of this delegated key by `d`, denote the public part of they key by `D=G*d`. This public key will uniquely identify the user across sessions and devices.
 
-Using `r` the user derives yet another key pair, which will be the *refresh key pair*.
-To do so they receive a challenge `d` from the website and derive a random number `e=Keccak(r)`. 
- They then compute the private *refresh key* as `sk_r=r+Keccak(addr(pk),domain,d,e)` and a corresponding public *refresh key* `pk_r=G*(r+Keccak(addr(pk),domain,d,e))`.
+Using `d` the user derives yet another key pair, which will be the *refresh key pair*.
+To do so they receive a challenge `e` from the website and derive a random number `f=Keccak(d)`. 
+ They then compute the private *refresh key* as `r=d+Keccak(addr(pk),domain,e,f)` and a corresponding public *refresh key* `R=G*(d+Keccak(addr(pk),domain,e,f))`.
 
-The user then signs the public delegated key, the public *refresh key* and the server challenge with both the private delegated key and the private *refresh key*. That is, the user computes `a=sign(r, (R,pk_r, c))` and `b=sign(sk_r, (R,pk_r, c))`. Finally the user sends `a,b,R,pk_r` to the website.
-The website verifies the signatures and creates an account linked to `R` with a *refresh key* `pk_r` and furthermore stores `d`.
-The user stores `R,e,sk_r,pk_r`.
+The user then signs the public delegated key, the public *refresh key* and the server challenge with both the private delegated key and the private *refresh key*. That is, the user computes `a=sign(d, (D, R, e))` and `b=sign(r, (D, R, e))`. Finally the user sends `a, b, D, R` to the website.
+The website verifies the signatures and creates an account linked to `D` with a *refresh key* `R` and furthermore stores `e`.
+The user stores `D, R, r, e`, and hence the only secret information it keeps is the private *refresh key*.
 
-Note that now the secret key `r` can be deleted from memory, since it will only be required again when a new refresh key needs to be issued or old refresh keys need to be revoked. Both which are actions that require the user to access their wallet and hence their Ethereum account key, and thus they can just generate `r` again when needed.
+Note that now the private delegated key `d` can be deleted from memory, since it will only be required again when new refresh keys needs to be issued, or old refresh keys needs to be revoked. Both which are actions that require the user to access their wallet and hence their Ethereum account key. Thus the user can just generate `d` again when needed.
 
 ### User logs in to a website
-The user wants to log in to a website with domain `domain` for which it has previously constructed a *refresh key pair*.
-In this case the user simply asks the website for a new unique challenge, `c`, and signs this using `sk_r`. That is, `a=sign(sk_r, c)`. The user returns `a` to the website, which then verifies the signature on this with `pk_r` and that the challenge `c` is as expected.  
+The user wants to log in to a website with domain `domain` for which they have previously constructed a *refresh key* pair.
+In this case the user simply asks the website for a new unique challenge, `c`, and signs this using `r`. That is, `sign(r, c)`. The user returns the signature to the website, which then verifies this with `R` and that the challenge `c` is as expected.  
+
+Note that in practice the user will actually sign the entire Oauth access token and `c` the Oauth challenge code.
 
 ### User shares ENS 
-If the user wants to share their Ethereum identity with the website, they again ask the website for a new unique challenge `c`. The user then computes a personal signature on this challenge and the value `R` using its private Ethereum key, that is `f=sign(sk, (c, R))`. The user then shares `e`, `f` and `addr(pk)` with the website. The site then derives the user's candidate public key from `f` and checks that `pk=R+G*Keccak(addr(pk),domain,d,e)`. If so, it accepts the delegated key `R` is associated with the user's true Ethereum address `addr(pk)`.
+If the user wants to share their Ethereum identity with the website, they again ask the website for a new unique challenge `c`. The user then computes a personal signature on this challenge and the delegated public key `D` using its private Ethereum key, that is `g=sign(sk, (c, D))`. The user then shares `f`, `g` and `addr(pk)` with the website. The site then derives the user's candidate public key from `g` and checks that `pk=D+G*Keccak(addr(pk),domain,e,f)`. If so, it accepts the delegated key `D` is associated with the user's true Ethereum address `addr(pk)`.
 
 Note that instead of `addr(pk)` the user's ENS can simply be used instead.
 
 ### User revokes refresh key
-If a user's private *refresh key* has been compromised they issue a request to revoke _all_ previous *refresh keys* using their delegated Ethereum key. 
-Concretely the user reconstructs the private delegated key `r` using `domain` and their private Ethereum key `sk`. Then they simply sign a message containing a command `revoke`, a time stamp and the public delegated key `R`, using `r` and shares this with the webserver. That is, they share the signature `sign(r, (revoke, timestamp, R))`.
-The webserver will then discard any `pk_r` it has associated with `R`. Afterwards the user can construct a new *refresh key* pair.
+If a user's private *refresh key* has been compromised, they can issue a request to revoke _all_ previous *refresh keys* using their delegated Ethereum key. 
+Concretely the user reconstructs the private delegated key `d` using `domain` and their private Ethereum key `sk`. Then they simply sign a message containing a `revoke` command, a `timestamp` and the public delegated key `D`, using `d` and shares this with the webserver. That is, they share the signature `sign(d, (revoke, timestamp, D))`.
+The webserver will then discard any public *refresh key* `R` it has associated with `D`. Afterwards the user can construct a new *refresh key* pair.
 
-Note that the reason _all_ previous refresh keys are revoked is because we don't assume any way of synchronising the different refresh keys (and the random numbers used to construct them) between different devices.
+Note that the reason _all_ previous refresh keys are revoked is because we don't assume any way of synchronising different refresh keys (and the random numbers used to construct them) between different devices.
 
 ## Security observation
 The crux of the specification is the following:
 
-1. The user both proves ownership of the *refresh key* by signing the challenge `c` provided by the website.
+1. The user proves ownership of the *refresh key* by signing the challenge `c` provided by the website.
 
-2. The third party site cannot brute-force the user's address due to the unpredictability of the value `e`.
+2. The website cannot brute-force the user's address due to the unpredictability of the value `f`.
 
-3. The *refresh key* has been linked to their Ethereum address from the get-go. The latter is achieved since the user "commits" to the random part of its site-specific key by disclosing the value `R`, and the rest of the *refresh key*, `Keccak(addr(pk),domain,d,e)` is uniquely determined in a way that is publicly disclosable but also unpredictable (before disclosure).
+3. The *refresh key* has been linked to their Ethereum address from the get-go. This is achieved since the user "commits" to the domain-specific delegated key `D`, and the rest of the *refresh key*, `Keccak(addr(pk),domain,e,f)` is uniquely determined in a way that is publicly discloseable but also unpredictable (before disclosure).
 
 ## Further work
