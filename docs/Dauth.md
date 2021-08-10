@@ -8,9 +8,9 @@ Dauth (decentralised authentication) provides Web2 developers with a login and a
 
 **2. Security**: The user's Ethereum key is not directly used. Instead, a *refresh key pair* is generated for each session and not shared between websites. This 1) prevents man-in-the-middle attack, where the attacking website forwards the login challenge from another site to itself; 2) allows the key pair to be revoked, so the user can stop stolen devices to stay in the login session; 3)  by using one key pair per site, if the keys are compromised, its originating Ethereum key is not, therefore, the safety of crypto assets is not affected.
 
-**3. User Experience**: The user, having logged in, can decide how long the session remains active (e.g. at home, longer sessions are allowed). The user doesn't need to do anything on the UI level, even if the website session times out and requires re-authentication; the authentication happens silently. This prevents modern-day awkwardness such as "session expired, please log in again".
+**3. Decentralisation**: No other servers are involved when a webserver allows users to log in using ETH Address. However if ENS is used, a node is involved. Through cryptography, instead of smart contract, there is no Ethereum smart contract required except the already-deployed ENS contract for the ENS using cases, hence allowing less centralised management.
 
-**4. Decentralisation**: No other servers are involved when a webserver allows users to log in using ETH Address. However if ENS is used, a node is involved.
+**4. User Experience** (though optional wallet extension): Through a wallet extension, the user can revoke the live sessions on a stolen device despite not having a centralised entity such as FATG having logged in, The same extension also allows the wallet to be smarter, managing how long the session remains active depending on how safe the environment is. This is not part of the deliverables of this project but remain as a design decision to allow future enhancement.
 
 ## High-level Mechanism
 
