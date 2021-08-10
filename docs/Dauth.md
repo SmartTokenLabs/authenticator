@@ -90,7 +90,7 @@ It's assumed that a compromised device leads to compromised sessions, but not a 
 
 ### Is the underlying cryptography sound?
 
-It is crucial that the *refresh key pair* is created securely. The exact algorithm is to be developed, with minimal models already existing pending further proof. An earlier algorithm is described in [an earlier version of this draft](Dauth-without-session-mgmt.md). The team working on this is the same set of people who worked on the zk identifier attestation protocol to be used in the Devcon ticket attestations and various other cryptographic endeavours. 
+It is crucial that the *refresh key pair* is created securely. The exact algorithm is to be developed, with minimal models already existing pending further proof. An earlier algorithm is described in [an earlier version of this draft](https://github.com/TokenScript/authenticator/blob/main/docs/Dauth-without-session-mgmt.md). The team working on this is the same set of people who worked on the zk identifier attestation protocol to be used in the Devcon ticket attestations and various other cryptographic endeavours. 
 
 
 ## Technical Specification

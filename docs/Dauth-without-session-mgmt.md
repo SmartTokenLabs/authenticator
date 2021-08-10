@@ -1,5 +1,7 @@
 # Dauth, an Oauth-based login protocol
 
+This is an earlier, simpler version where session management wasn't considered, but with the same cryptographic technology for security and privacy.
+
 ## Overview
 
 Dauth (Delegated-key Authentication, or decentralised authentication) provides Web2 developers with a login and authentication method that is based on Ethereum and is password-less. It will use the same Oauth API formats and similar communication flow that Web2 developers are already familiar with. This method is superior to logging in through signing a message with an Ethereum key because of the following reasons.
@@ -76,5 +78,3 @@ The crux of the specification is the following:
 2. The website cannot brute-force the user's address due to the unpredictability of the value `f`.
 
 3. The *refresh key* has been linked to their Ethereum address from the get-go. This is achieved since the user "commits" to the domain-specific delegated key `D`, and the rest of the *refresh key*, `Keccak(addr(pk),domain,e,f)` is uniquely determined in a way that is publicly discloseable but also unpredictable (before disclosure).
-
-## Further work
